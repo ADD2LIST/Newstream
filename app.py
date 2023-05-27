@@ -1,62 +1,47 @@
-import streamlit as st
 
-from PIL import Image
 
-import io
 
-# Function to compress the image
 
-def compress_image(image, quality):
+        import streamlit as st
 
-    # Open the image using Pillow
+import qrcode
 
-    img = Image.open(image)
+def generate_qr_code(data, image_size=200):
 
-    # Create an in-memory buffer to store the compressed image
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
 
-    img_buffer = io.BytesIO()
+    qr.add_data(data)
 
-    # Save the image to the buffer with the specified quality
+    qr.make(fit=True)
 
-    img.save(img_buffer, format='JPEG', quality=quality)
+    qr_image = qr.make_image(fill_color="black", back_color="white")
 
-    # Return the compressed image as bytes
+    qr_image = qr_image.resize((image_size, image_size))
 
-    return img_buffer.getvalue()
-
-# Streamlit app
+    return qr_image
 
 def main():
 
-    st.title("Image Compressor")
+    st.title("QR Code Maker")
 
-    # File uploader
+    # User input for the data
 
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg"])
+    data = st.text_input("Enter the data to encode into QR code")
 
-    if uploaded_file is not None:
+    # Generate QR code
 
-        # Display the uploaded image
+    if st.button("Generate QR Code"):
 
-        st.image(uploaded_file, caption="Original Image", use_column_width=True)
+        if data:
 
-        # Compression options
+            qr_image = generate_qr_code(data)
 
-        quality = st.slider("Select compression quality", min_value=1, max_value=100, value=50)
+            st.image(qr_image, caption="QR Code", use_column_width=True)
 
-        if st.button("Compress"):
+        else:
 
-            # Compress the image
-
-            compressed_image = compress_image(uploaded_file, quality)
-
-            # Display the compressed image
-
-            st.image(compressed_image, caption="Compressed Image", use_column_width=True)
-
-# Run the app
+            st.warning("Please enter the data to encode")
 
 if __name__ == "__main__":
 
     main()
-
